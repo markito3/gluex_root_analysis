@@ -506,7 +506,8 @@ void Print_SourceFile(string locSelectorBaseName, DTreeInterface* locTreeInterfa
 	locSourceStream << "		OUTEVTStats <<\"  \" <<  dThisEventNumberOfChargedFS ; " <<endl;
 	locSourceStream << "		OUTEVTStats <<\"  \" <<  dThisEventNumberOfPositiveFS ; " <<endl;
 	locSourceStream << "		OUTEVTStats <<\"  \" <<  dThisEventNumberOfNegativeFS ; " <<endl;
-	locSourceStream << "		OUTEVTStats <<\"  \" <<  dThisEventNumberOfNeutralFS << endl; " <<endl;
+	locSourceStream << "		OUTEVTStats <<\"  \" <<  dThisEventNumberOfNeutralFS ; " <<endl;
+	locSourceStream << "		OUTEVTStats <<\"  \" <<  dThisEventNumberOfFSAndInTime << endl; " <<endl;
 	locSourceStream << "	}"<<endl;
 	locSourceStream << "	//FILL HISTOGRAMS: Num combos / events surviving actions" << endl;
 	locSourceStream << "	Fill_NumCombosSurvivedHists();" << endl;
@@ -583,9 +584,10 @@ void Print_SourceFile(string locSelectorBaseName, DTreeInterface* locTreeInterfa
 	locSourceStream << "	Int_t loc_i = ComboID;" << endl;
 	locSourceStream << "	dComboWrapper->Set_ComboIndex(loc_i);" << endl;
 	locSourceStream << endl;
-	locSourceStream << "    float locGlobalWeightFactor = 1.; " <<endl;
+	locSourceStream << "	float locGlobalWeightFactor = 1.; " <<endl;
 	locSourceStream << "	if (LoopID > 0) { // second call adjust GlobalWeight factor" << endl;  
-	locSourceStream << "		locGlobalWeightFactor = 1./(float)dThisEventNumberOfFSAndInTime;" <<endl;
+	locSourceStream << "		if (dThisEventNumberOfFSAndInTime>0)"<<endl;
+	locSourceStream << "			locGlobalWeightFactor = 1./(float)dThisEventNumberOfFSAndInTime;" <<endl;
 	locSourceStream << "	}" <<endl;
 	locSourceStream << "	// Total combo weight factor is: w = w1*w2 with"<<endl;
 	locSourceStream << "	//       w1 = -1/nbunches for accidentals and w1 = 1 for prompt beam photons"<<endl;
@@ -990,7 +992,7 @@ void Print_SourceFile(string locSelectorBaseName, DTreeInterface* locTreeInterfa
 	locSourceStream << "		//so anything you do will not have the combined information from the various threads." << endl;
 	locSourceStream << "		//Besides, it is best-practice to do post-processing (e.g. fitting) separately, in case there is a problem." << endl;
 	locSourceStream << endl;
-	locSourceStream << "    OUTEVTStats.close(); "<<endl;
+	locSourceStream << "	OUTEVTStats.close(); "<<endl;
 	locSourceStream << endl;
 	locSourceStream << "	//DO YOUR STUFF HERE" << endl;
 	locSourceStream << endl;
