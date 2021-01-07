@@ -944,12 +944,16 @@ void Print_SourceFile(string locSelectorBaseName, DTreeInterface* locTreeInterfa
 	locSourceStream << "		} " <<endl;
 	locSourceStream << "	} " << endl;
 	locSourceStream << endl;
+	locSourceStream << "	if (LoopID>1) " << endl;
+	locSourceStream << "	{ " << endl;
+	locSourceStream << "		/************* Fill your final histograms here with weight = locTotalComboWeight *********/"<<endl;
 	locSourceStream << endl;
+	locSourceStream << "	} " << endl;
 	locSourceStream << endl;
 	locSourceStream << "	/****************************************** FILL FLAT TREE (IF DESIRED) ******************************************/" << endl;
 	locSourceStream << endl;
 	locSourceStream << "	/*" << endl;
-	locSourceStream << "	if (LoopOD == 0) {" << endl;
+	locSourceStream << "	if (LoopID == 0) {" << endl;
 	locSourceStream << "		//FILL ANY CUSTOM BRANCHES FIRST!!" << endl;
 	locSourceStream << "		Int_t locMyInt_Flat = 7;" << endl;
 	locSourceStream << "		dFlatTreeInterface->Fill_Fundamental<Int_t>(\"flat_my_int\", locMyInt_Flat);" << endl;
@@ -967,7 +971,7 @@ void Print_SourceFile(string locSelectorBaseName, DTreeInterface* locTreeInterfa
 	locSourceStream << "	*/" << endl;
 	locSourceStream << endl;
 	locSourceStream << "	//FILL FLAT TREE" << endl;
-	locSourceStream << "	//if (LoopOD == 0) {" << endl;
+	locSourceStream << "	//if (LoopID == 0) {" << endl;
 	locSourceStream << "	//Fill_FlatTree(); //for the active combo" << endl;
 	locSourceStream << "	//}" << endl;
 	locSourceStream << endl;
