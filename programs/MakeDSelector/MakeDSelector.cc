@@ -766,6 +766,7 @@ void Print_SourceFile(string locSelectorBaseName, DTreeInterface* locTreeInterfa
 	locSourceStream << "	/********************************************* COMBINE FOUR-MOMENTUM ********************************************/" << endl;
 	locSourceStream << endl;
 	locSourceStream << "	// DO YOUR STUFF HERE" << endl;
+	locSourceStream << "	// Filling of histograms should be done either with LoopID == 0 or LoopID > 0 only ! (never both)" << endl;
 	locSourceStream << endl;
 	locSourceStream << "	// Combine 4-vectors" << endl;
 	locSourceStream << "	TLorentzVector locMissingP4_Measured = locBeamP4_Measured + dTargetP4;" << endl;
