@@ -104,9 +104,26 @@ void Print_HeaderFile(string locSelectorBaseName, DTreeInterface* locTreeInterfa
 	locHeaderStream << "		Bool_t Process(Long64_t entry);" << endl;
 	locHeaderStream << "		Bool_t ProcessCombo(Int_t ComboID, Int_t LoopID);" << endl;
 	locHeaderStream << endl;
-	locHeaderStream << "		set<Int_t> dUsedSoFar_BeamEnergy; //Int_t: Unique ID for beam particles. set: easy to use, fast to search" << endl;
+	locHeaderStream << "	private:" << endl;
+	locHeaderStream << endl;
+	locHeaderStream << "		void Get_ComboWrappers(void);" << endl;
+	locHeaderStream << "		void Finalize(void);" << endl;
+	locHeaderStream << endl;
+	locHeaderStream << "		// BEAM POLARIZATION INFORMATION" << endl;
+	locHeaderStream << "		UInt_t dPreviousRunNumber;" << endl;
+	locHeaderStream << "		bool dIsPolarizedFlag; //else is AMO" << endl;
+	locHeaderStream << "		bool dIsPARAFlag; //else is PERP or AMO" << endl;
+	locHeaderStream << endl;
+	locHeaderStream << "		bool dIsMC;" << endl;
+	locHeaderStream << endl;
+	locHeaderStream << "		// ANALYZE CUT ACTIONS" << endl;
+	locHeaderStream << "		// // Automatically makes mass histograms where one cut is missing" << endl;
+	locHeaderStream << "		DHistogramAction_AnalyzeCutActions* dAnalyzeCutActions;" << endl;
+	locHeaderStream << endl;
+	locHeaderStream << "		// UNIQUENESS TRACKING " << endl;
+	locHeaderStream << "		set<Int_t> dUsedSoFar_BeamEnergy; //Int_t: Unique ID for beam particles." << endl;
 	locHeaderStream << "		set<map<Particle_t, set<Int_t> > > dUsedSoFar_MissingMass;" << endl;
-	locHeaderStream << "		ofstream OUTEVTStats;"<<endl;
+	locHeaderStream << endl;
 	locHeaderStream << "		set<map<Int_t, set<Int_t> > > dEventFS_All_withBEAM;  // BEAM is 0" << endl;
 	locHeaderStream << "		set<map<Int_t, set<Int_t> > > dEventFS_All;" << endl;
 	locHeaderStream << "		set<map<Int_t, set<Int_t> > > dEventFS_Charged;   // 10" << endl;
@@ -124,22 +141,6 @@ void Print_HeaderFile(string locSelectorBaseName, DTreeInterface* locTreeInterfa
 	locHeaderStream << "		Int_t dThisEventNumberOfNeutralFS; " <<endl;
 	locHeaderStream << "		// add here similar maps and counters for your specific analysis for particles like " <<endl;
 	locHeaderStream << "		// Protons, Kaons and Pions if you whish to do so " <<endl;
-	locHeaderStream << endl;
-	locHeaderStream << "	private:" << endl;
-	locHeaderStream << endl;
-	locHeaderStream << "		void Get_ComboWrappers(void);" << endl;
-	locHeaderStream << "		void Finalize(void);" << endl;
-	locHeaderStream << endl;
-	locHeaderStream << "		// BEAM POLARIZATION INFORMATION" << endl;
-	locHeaderStream << "		UInt_t dPreviousRunNumber;" << endl;
-	locHeaderStream << "		bool dIsPolarizedFlag; //else is AMO" << endl;
-	locHeaderStream << "		bool dIsPARAFlag; //else is PERP or AMO" << endl;
-	locHeaderStream << endl;
-	locHeaderStream << "		bool dIsMC;" << endl;
-	locHeaderStream << endl;
-	locHeaderStream << "		// ANALYZE CUT ACTIONS" << endl;
-	locHeaderStream << "		// // Automatically makes mass histograms where one cut is missing" << endl;
-	locHeaderStream << "		DHistogramAction_AnalyzeCutActions* dAnalyzeCutActions;" << endl;
 	locHeaderStream << endl;
 	locHeaderStream << "		//CREATE REACTION-SPECIFIC PARTICLE ARRAYS" << endl;
 	locHeaderStream << endl;
@@ -268,7 +269,7 @@ void Print_SourceFile(string locSelectorBaseName, DTreeInterface* locTreeInterfa
 	locSourceStream << "	//USERS: SET OUTPUT FILE NAME //can be overriden by user in PROOF" << endl;
 	locSourceStream << "	dOutputFileName = \"" << locSelectorBaseName << ".root\"; //\"\" for none" << endl;
 	locSourceStream << "	dOutputTreeFileName = \"\"; //\"\" for none" << endl;
-	locSourceStream << "	dFlatTreeFileName = \"\"; //output flat tree (one combo per tree entry), \"\" for none" << endl;
+	locSourceStream << "	dFlatTreeFileName = \"FlatTree_"<< locSelectorBaseName << ".root\"; //output flat tree (one combo per tree entry), \"\" for none" << endl;
 	locSourceStream << "	dFlatTreeName = \"\"; //if blank, default name will be chosen" << endl;
 	locSourceStream << "	//dSaveDefaultFlatBranches = true; // False: don't save default branches, reduce disk footprint." << endl;
 	locSourceStream << endl;
@@ -282,11 +283,6 @@ void Print_SourceFile(string locSelectorBaseName, DTreeInterface* locTreeInterfa
 	locSourceStream << endl;
 	locSourceStream << "	Get_ComboWrappers();" << endl;
 	locSourceStream << "	dPreviousRunNumber = 0;" << endl;
-	locSourceStream << endl;
-
-	locSourceStream << "	/* Open statistics log file for event by event analysis */" <<endl;
-	locSourceStream << endl;
-	locSourceStream << "	OUTEVTStats.open(\"eventstatistics.log\", std::ofstream::out); "<<endl;
 	locSourceStream << endl;
 	locSourceStream << "	/*********************************** EXAMPLE USER INITIALIZATION: ANALYSIS ACTIONS **********************************/" << endl;
 	locSourceStream << endl;
@@ -365,6 +361,10 @@ void Print_SourceFile(string locSelectorBaseName, DTreeInterface* locTreeInterfa
 	locSourceStream << "	dFlatTreeInterface->Create_Branch_NoSplitTObject<TLorentzVector>(\"flat_my_p4\");" << endl;
 	locSourceStream << "	dFlatTreeInterface->Create_Branch_ClonesArray<TLorentzVector>(\"flat_my_p4_array\");" << endl;
 	locSourceStream << "	*/" << endl;
+	locSourceStream << "	// KEEP STATISTICS FROM EVENT Uniqueness " << endl;
+	locSourceStream << "	dFlatTreeInterface->Create_Branch_Fundamental<Int_t>(\"Unique_EVT_int\");" << endl;
+	locSourceStream << "	dFlatTreeInterface->Create_Branch_FundamentalArray<Int_t>(\"Unique_EVT_int_array\", \"Unique_EVT_int\");" << endl;
+
 	locSourceStream << endl;
 	locSourceStream << "	/************************************* ADVANCED EXAMPLE: CHOOSE BRANCHES TO READ ************************************/" << endl;
 	locSourceStream << endl;
@@ -383,9 +383,9 @@ void Print_SourceFile(string locSelectorBaseName, DTreeInterface* locTreeInterfa
 	locSourceStream << endl;
 	locSourceStream << "}" << endl;
 	locSourceStream << endl;
-	//
+	// +++++++++++++++++++++++++++++++++
 	// Definition of ::Process() method
-	//
+	// +++++++++++++++++++++++++++++++++
 	locSourceStream << "Bool_t " << locSelectorName << "::Process(Long64_t locEntry)" << endl;
 	locSourceStream << "{" << endl;
 	locSourceStream << "	// The Process() function is called for each entry in the tree. The entry argument" << endl;
@@ -496,18 +496,19 @@ void Print_SourceFile(string locSelectorBaseName, DTreeInterface* locTreeInterfa
 
 	locSourceStream << "	/* log combo statistics for this event */" <<endl;
 	locSourceStream << "	if (dEventFS_All.size() > 0){"<<endl;
-	locSourceStream << "		OUTEVTStats << Get_EventNumber(); "<<endl;
-	locSourceStream << "		OUTEVTStats <<\"  \" <<  locEventNChargedTracks;"<<endl;
-	locSourceStream << "		OUTEVTStats <<\"  \" <<  locEventNNeutralShowers;"<<endl;
-	locSourceStream << "		OUTEVTStats <<\"  \" <<  locEventNBeamPhotons;"<<endl;
-	locSourceStream << "		OUTEVTStats <<\" :  \" <<  dThisEventNumberOfFS ; " <<endl;
-	locSourceStream << "		OUTEVTStats <<\"  \" <<  dThisEventNumberOfFSInTime ; " <<endl;
-	locSourceStream << "		OUTEVTStats <<\"  \" <<  dThisEventNumberOfFSOutOfTime ; " <<endl;
-	locSourceStream << "		OUTEVTStats <<\"  \" <<  dThisEventNumberOfChargedFS ; " <<endl;
-	locSourceStream << "		OUTEVTStats <<\"  \" <<  dThisEventNumberOfPositiveFS ; " <<endl;
-	locSourceStream << "		OUTEVTStats <<\"  \" <<  dThisEventNumberOfNegativeFS ; " <<endl;
-	locSourceStream << "		OUTEVTStats <<\"  \" <<  dThisEventNumberOfNeutralFS ; " <<endl;
-	locSourceStream << "		OUTEVTStats <<\"  \" <<  dThisEventNumberOfFSAndInTime << endl; " <<endl;
+	locSourceStream << "		dFlatTreeInterface->Fill_Fundamental<Int_t>(\"Unique_EVT_int\", 11);" <<endl;
+	locSourceStream << "		dFlatTreeInterface->Fill_Fundamental<Int_t>(\"Unique_EVT_int_array\", (Int_t)Get_EventNumber(), 0);" <<endl;
+	locSourceStream << "		dFlatTreeInterface->Fill_Fundamental<Int_t>(\"Unique_EVT_int_array\", locEventNChargedTracks, 1);" <<endl;
+	locSourceStream << "		dFlatTreeInterface->Fill_Fundamental<Int_t>(\"Unique_EVT_int_array\", locEventNNeutralShowers, 2);" <<endl;
+	locSourceStream << "		dFlatTreeInterface->Fill_Fundamental<Int_t>(\"Unique_EVT_int_array\", locEventNBeamPhotons, 3);" <<endl; 
+	locSourceStream << "		dFlatTreeInterface->Fill_Fundamental<Int_t>(\"Unique_EVT_int_array\", dThisEventNumberOfFS, 4);" <<endl; 
+	locSourceStream << "		dFlatTreeInterface->Fill_Fundamental<Int_t>(\"Unique_EVT_int_array\", dThisEventNumberOfFSInTime, 5);" <<endl;
+	locSourceStream << "		dFlatTreeInterface->Fill_Fundamental<Int_t>(\"Unique_EVT_int_array\", dThisEventNumberOfFSOutOfTime, 6);" <<endl;
+	locSourceStream << "		dFlatTreeInterface->Fill_Fundamental<Int_t>(\"Unique_EVT_int_array\", dThisEventNumberOfChargedFS, 7);" <<endl;
+	locSourceStream << "		dFlatTreeInterface->Fill_Fundamental<Int_t>(\"Unique_EVT_int_array\", dThisEventNumberOfPositiveFS, 8);" <<endl;
+	locSourceStream << "		dFlatTreeInterface->Fill_Fundamental<Int_t>(\"Unique_EVT_int_array\", dThisEventNumberOfNegativeFS, 9);" <<endl;
+	locSourceStream << "		dFlatTreeInterface->Fill_Fundamental<Int_t>(\"Unique_EVT_int_array\", dThisEventNumberOfNeutralFS, 10);" <<endl;
+	locSourceStream << "		Fill_FlatTree();" << endl;
 	locSourceStream << "	}"<<endl;
 	locSourceStream << "	//FILL HISTOGRAMS: Num combos / events surviving actions" << endl;
 	locSourceStream << "	Fill_NumCombosSurvivedHists();" << endl;
@@ -575,9 +576,9 @@ void Print_SourceFile(string locSelectorBaseName, DTreeInterface* locTreeInterfa
 	locSourceStream << endl;
 	locSourceStream << "	return kTRUE;" << endl;
 	locSourceStream << "}" << endl;
-	//
+	// ++++++++++++++++++++++++++++++++++++++
 	// Definition of ::ProcessCombo() method
-	//
+	// ++++++++++++++++++++++++++++++++++++++
 	locSourceStream << "Bool_t " << locSelectorName << "::ProcessCombo(Int_t ComboID, Int_t LoopID)" << endl;
 	locSourceStream << "{" << endl;
 	locSourceStream << "	//Set branch array indices for combo and all combo particles" << endl;
@@ -991,8 +992,6 @@ void Print_SourceFile(string locSelectorBaseName, DTreeInterface* locTreeInterfa
 	locSourceStream << "		//If you are using PROOF, this function is called on each thread," << endl;
 	locSourceStream << "		//so anything you do will not have the combined information from the various threads." << endl;
 	locSourceStream << "		//Besides, it is best-practice to do post-processing (e.g. fitting) separately, in case there is a problem." << endl;
-	locSourceStream << endl;
-	locSourceStream << "	OUTEVTStats.close(); "<<endl;
 	locSourceStream << endl;
 	locSourceStream << "	//DO YOUR STUFF HERE" << endl;
 	locSourceStream << endl;
