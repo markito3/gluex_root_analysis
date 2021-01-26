@@ -958,7 +958,7 @@ void Print_SourceFile(string locSelectorBaseName, DTreeInterface* locTreeInterfa
 	locSourceStream << "		} " <<endl;
 	locSourceStream << "	} " << endl;
 	locSourceStream << endl;
-	locSourceStream << "	if (LoopID>1) " << endl;
+	locSourceStream << "	if (LoopID>0) " << endl;
 	locSourceStream << "	{ " << endl;
 	locSourceStream << "		/************* Fill your final histograms here with weight = locTotalComboWeight *********/"<<endl;
 	locSourceStream << endl;
