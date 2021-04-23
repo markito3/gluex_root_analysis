@@ -126,19 +126,22 @@ void Print_HeaderFile(string locSelectorBaseName, DTreeInterface* locTreeInterfa
 	locHeaderStream << endl;
 	locHeaderStream << "		set<map<Int_t, set<Int_t> > > dEventFS_All_withBEAM;  // BEAM is 0" << endl;
 	locHeaderStream << "		set<map<Int_t, set<Int_t> > > dEventFS_All;" << endl;
+	locHeaderStream << "		set<map<Int_t, set<Int_t> > > dEvent_BEAM;        // 0" << endl;
 	locHeaderStream << "		set<map<Int_t, set<Int_t> > > dEventFS_Charged;   // 10" << endl;
 	locHeaderStream << "		set<map<Int_t, set<Int_t> > > dEventFS_Positive;  // 1" << endl;
 	locHeaderStream << "		set<map<Int_t, set<Int_t> > > dEventFS_Negative;  // 2" << endl;
 	locHeaderStream << "		set<map<Int_t, set<Int_t> > > dEventFS_Neutral;   // 3" << endl;
 	locHeaderStream << "		std::pair<std::set<map<Int_t, set<Int_t> > >::iterator,bool> dRetVal; " <<endl;
-	locHeaderStream << "		Int_t dThisEventNumberOfFS; " <<endl;
-	locHeaderStream << "		Int_t dThisEventNumberOfFSAndInTime; " <<endl; // FS only, but has in time beam photon
-	locHeaderStream << "		Int_t dThisEventNumberOfFSInTime; " <<endl;    // FS and Beam Photon
-	locHeaderStream << "		Int_t dThisEventNumberOfFSOutOfTime; " <<endl; // FS and Beam Photon
+	locHeaderStream << "		Int_t dThisEventNumberOfCombos; " <<endl;
+	locHeaderStream << "		Int_t dThisEventNumberOfCombosInTime; " <<endl;    // Combo with prompt Beam Photon
+	locHeaderStream << "		Int_t dThisEventNumberOfCombosOutOfTime; " <<endl;  // Combos with out-of-time Beam Photon
+	locHeaderStream << "		Int_t dThisEventNumberOfFSAndInTime; " <<endl;      // Unique FS AND has prompt beam photon
 	locHeaderStream << "		Int_t dThisEventNumberOfChargedFS; " <<endl;
 	locHeaderStream << "		Int_t dThisEventNumberOfPositiveFS; " <<endl;
 	locHeaderStream << "		Int_t dThisEventNumberOfNegativeFS; " <<endl;
 	locHeaderStream << "		Int_t dThisEventNumberOfNeutralFS; " <<endl;
+	locHeaderStream << "		Int_t dThisEventNumberOfPromptBeamPhotons; " <<endl;
+	locHeaderStream << "		Int_t dThisEventNumberOfAccidentalBeamPhotons; " <<endl;
 
 	locHeaderStream << "		Int_t dEventNChargedTracks; " <<endl;
 	locHeaderStream << "		Int_t dEventNNeutralShowers; " <<endl;
@@ -444,20 +447,23 @@ void Print_SourceFile(string locSelectorBaseName, DTreeInterface* locTreeInterfa
 	locSourceStream << "	dUsedSoFar_MissingMass.clear();" << endl;
 	locSourceStream << endl;
 	locSourceStream << "	// Initilaize event topology counters " << endl;
-	locSourceStream << "	dEventFS_All_withBEAM.clear();  // BEAM is 0" << endl;
-	locSourceStream << "	dEventFS_All.clear();" << endl;
+	locSourceStream << "	dEventFS_All_withBEAM.clear();  // Unique Combo BEAM is 0" << endl;
+	locSourceStream << "	dEventFS_All.clear();           // Unique FS but with prompt beamp photon " << endl;
+	locSourceStream << "	dEvent_BEAM.clear();            // Unique Beam photon" << endl;
 	locSourceStream << "	dEventFS_Charged.clear();   // 10" << endl;
 	locSourceStream << "	dEventFS_Positive.clear();  // 1" << endl;
 	locSourceStream << "	dEventFS_Negative.clear();  // 2" << endl;
 	locSourceStream << "	dEventFS_Neutral.clear();   // 3" << endl;
-	locSourceStream << "	dThisEventNumberOfFS = 0; " <<endl;
+	locSourceStream << "	dThisEventNumberOfCombos = 0; " <<endl;
+	locSourceStream << "	dThisEventNumberOfCombosInTime = 0; " <<endl;
+	locSourceStream << "	dThisEventNumberOfCombosOutOfTime = 0; " <<endl;
 	locSourceStream << "	dThisEventNumberOfFSAndInTime = 0; " <<endl;
-	locSourceStream << "	dThisEventNumberOfFSInTime = 0; " <<endl;
-	locSourceStream << "	dThisEventNumberOfFSOutOfTime = 0; " <<endl;
 	locSourceStream << "	dThisEventNumberOfChargedFS = 0; " <<endl;
 	locSourceStream << "	dThisEventNumberOfPositiveFS = 0; " <<endl;
 	locSourceStream << "	dThisEventNumberOfNegativeFS = 0; " <<endl;
 	locSourceStream << "	dThisEventNumberOfNeutralFS = 0; " <<endl;
+	locSourceStream << "	dThisEventNumberOfPromptBeamPhotons = 0; " <<endl;
+	locSourceStream << "	dThisEventNumberOfAccidentalBeamPhotons = 0; " <<endl;
 	locSourceStream << "	// add here similar maps and counters for your specific analysis for particles like " <<endl;
 	locSourceStream << "	// Protons, Kaons and Pions " <<endl;
 	locSourceStream << endl;
@@ -501,19 +507,21 @@ void Print_SourceFile(string locSelectorBaseName, DTreeInterface* locTreeInterfa
 
 	locSourceStream << "	/* log combo statistics for this event */" <<endl;
 	locSourceStream << "	if (dEventFS_All.size() > 0){"<<endl;
-	locSourceStream << "		dFlatTreeInterface->Fill_Fundamental<Int_t>(\"Unique_EVT_int\", 12);" <<endl;
+	locSourceStream << "		dFlatTreeInterface->Fill_Fundamental<Int_t>(\"Unique_EVT_int\", 14);" <<endl;
 	locSourceStream << "		dFlatTreeInterface->Fill_Fundamental<Int_t>(\"Unique_EVT_int_array\", (Int_t)Get_EventNumber(), 0);" <<endl;
 	locSourceStream << "		dFlatTreeInterface->Fill_Fundamental<Int_t>(\"Unique_EVT_int_array\", dEventNChargedTracks, 1);" <<endl;
 	locSourceStream << "		dFlatTreeInterface->Fill_Fundamental<Int_t>(\"Unique_EVT_int_array\", dEventNNeutralShowers, 2);" <<endl;
 	locSourceStream << "		dFlatTreeInterface->Fill_Fundamental<Int_t>(\"Unique_EVT_int_array\", dEventNBeamPhotons, 3);" <<endl; 
-	locSourceStream << "		dFlatTreeInterface->Fill_Fundamental<Int_t>(\"Unique_EVT_int_array\", dThisEventNumberOfFS, 4);" <<endl; 
-	locSourceStream << "		dFlatTreeInterface->Fill_Fundamental<Int_t>(\"Unique_EVT_int_array\", dThisEventNumberOfFSAndInTime, 5);" <<endl; 
-	locSourceStream << "		dFlatTreeInterface->Fill_Fundamental<Int_t>(\"Unique_EVT_int_array\", dThisEventNumberOfFSInTime, 6);" <<endl;
-	locSourceStream << "		dFlatTreeInterface->Fill_Fundamental<Int_t>(\"Unique_EVT_int_array\", dThisEventNumberOfFSOutOfTime, 7);" <<endl;
+	locSourceStream << "		dFlatTreeInterface->Fill_Fundamental<Int_t>(\"Unique_EVT_int_array\", dThisEventNumberOfCombos, 4);" <<endl; 
+	locSourceStream << "		dFlatTreeInterface->Fill_Fundamental<Int_t>(\"Unique_EVT_int_array\", dThisEventNumberOfCombosInTime, 5);" <<endl;
+	locSourceStream << "		dFlatTreeInterface->Fill_Fundamental<Int_t>(\"Unique_EVT_int_array\", dThisEventNumberOfCombosOutOfTime, 6);" <<endl;
+	locSourceStream << "		dFlatTreeInterface->Fill_Fundamental<Int_t>(\"Unique_EVT_int_array\", dThisEventNumberOfFSAndInTime, 7);" <<endl; 
 	locSourceStream << "		dFlatTreeInterface->Fill_Fundamental<Int_t>(\"Unique_EVT_int_array\", dThisEventNumberOfChargedFS, 8);" <<endl;
 	locSourceStream << "		dFlatTreeInterface->Fill_Fundamental<Int_t>(\"Unique_EVT_int_array\", dThisEventNumberOfPositiveFS, 9);" <<endl;
 	locSourceStream << "		dFlatTreeInterface->Fill_Fundamental<Int_t>(\"Unique_EVT_int_array\", dThisEventNumberOfNegativeFS, 10);" <<endl;
 	locSourceStream << "		dFlatTreeInterface->Fill_Fundamental<Int_t>(\"Unique_EVT_int_array\", dThisEventNumberOfNeutralFS, 11);" <<endl;
+	locSourceStream << "		dFlatTreeInterface->Fill_Fundamental<Int_t>(\"Unique_EVT_int_array\", dThisEventNumberOfPromptBeamPhotons, 12);" <<endl;
+	locSourceStream << "		dFlatTreeInterface->Fill_Fundamental<Int_t>(\"Unique_EVT_int_array\", dThisEventNumberOfAccidentalBeamPhotons, 13);" <<endl;
 	locSourceStream << "		Fill_FlatTree();" << endl;
 	locSourceStream << "	}"<<endl;
 	locSourceStream << "	//FILL HISTOGRAMS: Num combos / events surviving actions" << endl;
@@ -593,8 +601,11 @@ void Print_SourceFile(string locSelectorBaseName, DTreeInterface* locTreeInterfa
 	locSourceStream << "	Int_t loc_i = ComboID;" << endl;
 	locSourceStream << "	dComboWrapper->Set_ComboIndex(loc_i);" << endl;
 	locSourceStream << endl;
-	locSourceStream << "	Double_t locGlobalWeightFactor = 1.; " <<endl;
-	locSourceStream << "	if (LoopID > 0) { // second call adjust GlobalWeight factor" << endl;  
+	locSourceStream << "	Double_t locGlobalWeightFactor = 1.; // this will be used further to modify Combo Weight" <<endl;
+	locSourceStream << "	if (LoopID > 0) { " << endl;  
+	locSourceStream << "		//"<<endl;
+	locSourceStream << "		// Modify Weight based on results from first loop" <<endl;
+	locSourceStream << "		//"<<endl;
 	locSourceStream << "		if (dThisEventNumberOfFSAndInTime>0)"<<endl;
 	locSourceStream << "			locGlobalWeightFactor = 1./(float)dThisEventNumberOfFSAndInTime;" <<endl;
 	locSourceStream << "	}" <<endl;
@@ -619,7 +630,7 @@ void Print_SourceFile(string locSelectorBaseName, DTreeInterface* locTreeInterfa
 	locSourceStream << "	map<Int_t, set<Int_t> >  locComboFS_Positive;   // 1" << endl;
 	locSourceStream << "	map<Int_t, set<Int_t> >  locComboFS_Negative;   // 2" << endl;
 	locSourceStream << "	map<Int_t, set<Int_t> >  locComboFS_Neutral;    // 3" << endl;
-	locSourceStream << "	map<Int_t, set<Int_t> >  locComboFS_BEAM;       // 0" << endl;
+	locSourceStream << "	map<Int_t, set<Int_t> >  locCombo_BEAM;       // 0" << endl;
 
 	
 	locSourceStream << "	set<Int_t> locCombo_Neutral;    // all FS neutrals " << endl;
@@ -771,13 +782,15 @@ void Print_SourceFile(string locSelectorBaseName, DTreeInterface* locTreeInterfa
 	locSourceStream << "	 	return kFALSE; " << endl;
 	locSourceStream << "	} " << endl;
 	locSourceStream << endl;
-	locSourceStream << "	// use the following weight for the current combo! "<<endl;
+	locSourceStream << "	// "<<endl;
+	locSourceStream << "	// EVENT WEIGHT for the current combo! (locGlobalWeightFactor = 1 or 1/dEventNumberOfFSAndInTime)"<<endl;
+	locSourceStream << "	// "<<endl;
 	locSourceStream << "	Double_t locTotalComboWeight = locHistAccidWeightFactor * locGlobalWeightFactor ;"<<endl;
 	locSourceStream << endl;
 	locSourceStream << "	/********************************************* COMBINE FOUR-MOMENTUM ********************************************/" << endl;
 	locSourceStream << endl;
 	locSourceStream << "	// DO YOUR STUFF HERE" << endl;
-	locSourceStream << "	// Filling of histograms should be done either with LoopID == 0 or LoopID > 0 only ! (never both)" << endl;
+	locSourceStream << "	// Filling of histograms should be done either within if statement of LoopID == 0 or LoopID > 0 only ! (never both)" << endl;
 	locSourceStream << endl;
 	locSourceStream << "	// Combine 4-vectors" << endl;
 	locSourceStream << "	TLorentzVector locMissingP4_Measured = locBeamP4_Measured + dTargetP4;" << endl;
@@ -816,7 +829,7 @@ void Print_SourceFile(string locSelectorBaseName, DTreeInterface* locTreeInterfa
 	locSourceStream << endl;
 	locSourceStream << "	/******************************************** EXECUTE ANALYSIS ACTIONS *******************************************/" << endl;
 	locSourceStream << endl;
-	locSourceStream << "	if(!LoopID) // only do this in the first loop over comobs" << endl;
+	locSourceStream << "	if(LoopID == 0) // only do this in the first loop over comobs" << endl;
 	locSourceStream << "	{" <<endl;
  	locSourceStream << "		// Loop through the analysis actions, executing them in order for the active particle combo" << endl;
 	locSourceStream << "		dAnalyzeCutActions->Perform_Action(); // Must be executed before Execute_Actions()" << endl;
@@ -907,7 +920,9 @@ void Print_SourceFile(string locSelectorBaseName, DTreeInterface* locTreeInterfa
 	locSourceStream << "		//}" << endl;
 	locSourceStream << "	}" << endl;
 	locSourceStream << endl;
-	locSourceStream << "	// IPORTANT!: THE BOOLEAN VARIABLE \"locAllCutsOK\" make true if the combo passed all cuts/requirements !!!" << endl;
+	locSourceStream << "	//  "<< endl;
+	locSourceStream << "	// IPORTANT!: SET THE BOOLEAN VARIABLE \"locAllCutsOK\" to true if the combo passed all YOUR cuts/requirements !!!" << endl;
+	locSourceStream << "	// " << endl;
 	locSourceStream << "	Bool_t locAllCutsOK = false;" << endl;
 	locSourceStream << endl;
 	locSourceStream << "	if ( (locAllCutsOK) && (LoopID == 0) ) { " <<endl;
@@ -916,7 +931,7 @@ void Print_SourceFile(string locSelectorBaseName, DTreeInterface* locTreeInterfa
 	locSourceStream << "		locComboFS_Positive.insert(std::make_pair(1, locCombo_Positive)); "<<endl;
 	locSourceStream << "		locComboFS_Negative.insert(std::make_pair(2, locCombo_Negative)); "<<endl;
 	locSourceStream << "		locComboFS_Neutral.insert(std::make_pair(3, locCombo_Neutral)); "<<endl;
-	locSourceStream << "		locComboFS_BEAM.insert(std::make_pair(0, locCombo_BeamPhoton)); "<<endl;
+	locSourceStream << "		locCombo_BEAM.insert(std::make_pair(0, locCombo_BeamPhoton)); "<<endl;
 	locSourceStream << endl;
 	locSourceStream << "		locComboFS_All.insert(std::make_pair(1, locCombo_Positive)); "<<endl;
 	locSourceStream << "		locComboFS_All.insert(std::make_pair(2, locCombo_Negative)); "<<endl;
@@ -927,44 +942,54 @@ void Print_SourceFile(string locSelectorBaseName, DTreeInterface* locTreeInterfa
 	locSourceStream << "		locComboFS_All_withBEAM.insert(std::make_pair(3, locCombo_Neutral)); "<<endl;
 	locSourceStream << "		locComboFS_All_withBEAM.insert(std::make_pair(0, locCombo_BeamPhoton)); "<<endl;
 	locSourceStream << endl;
-	locSourceStream << "		// use the following for Event topology counting" <<endl;
+	locSourceStream << "		// " <<endl;
+	locSourceStream << "		// TEST Uniquness of Combo" <<endl;
+	locSourceStream << "		// " <<endl<<endl;
 	locSourceStream << "		dRetVal = dEventFS_All_withBEAM.insert(locComboFS_All_withBEAM);" <<endl;
-	locSourceStream << "		if (dRetVal.second) { " <<endl;
-	locSourceStream << "			if (!locRelBeamBucket) { " <<endl;
-	locSourceStream << "				dThisEventNumberOfFSInTime++; " <<endl;
+	locSourceStream << "		if (dRetVal.second) { // This is a unique Combo: because of FS or because of Beam photon or both" <<endl <<endl;
+	locSourceStream << "			dThisEventNumberOfCombos++; " <<endl <<endl;
+	locSourceStream << "			if (!locRelBeamBucket) {  // Prompt beam photon" <<endl <<endl;
+	locSourceStream << "				dThisEventNumberOfCombosInTime++; " <<endl <<endl;
 	locSourceStream << "				dRetVal = dEventFS_All.insert(locComboFS_All);" <<endl;
-	locSourceStream << "				if (dRetVal.second) { " <<endl;
-	locSourceStream << "					dThisEventNumberOfFS++; " <<endl;
+	locSourceStream << "				if (dRetVal.second) { " <<endl <<endl;
 	locSourceStream << "					dThisEventNumberOfFSAndInTime++; // counter used to modify weight in the second loop" <<endl; 
 	locSourceStream << "	       			} " <<endl;
 	locSourceStream << "   			} else { " <<endl;
-	locSourceStream << "   				dThisEventNumberOfFSOutOfTime++; " <<endl;
+	locSourceStream << "   				dThisEventNumberOfCombosOutOfTime++; " <<endl;
 	locSourceStream << "			} " <<endl;
+
+
+	locSourceStream << "			dRetVal = dEvent_BEAM.insert(locCombo_BEAM);" <<endl;
+	locSourceStream << "			if (dRetVal.second) {  // This a Unique Combo has a Unique Beam Photon" <<endl;
+	locSourceStream << "				if (!locRelBeamBucket) { " <<endl;
+	locSourceStream << "					dThisEventNumberOfPromptBeamPhotons++;	" <<endl;	
+	locSourceStream << "				} else {" <<endl;
+	locSourceStream << "					dThisEventNumberOfAccidentalBeamPhotons++;" <<endl;
+	locSourceStream << "				}" <<endl;
+	locSourceStream << "			}" <<endl;
+
+
+	locSourceStream << "			dRetVal = dEventFS_Positive.insert(locComboFS_Positive);" <<endl;
+	locSourceStream << "			if (dRetVal.second) { " <<endl;
+	locSourceStream << "				dThisEventNumberOfPositiveFS ++; " <<endl;
+	locSourceStream << "			} " <<endl;
+	locSourceStream << "			dRetVal = dEventFS_Negative.insert(locComboFS_Negative);" <<endl;
+	locSourceStream << "			if (dRetVal.second) { " <<endl;
+	locSourceStream << "				dThisEventNumberOfNegativeFS ++; " <<endl;
+	locSourceStream << "			} " <<endl;
+	locSourceStream << "			dRetVal = dEventFS_Neutral.insert(locComboFS_Neutral);" <<endl;
+	locSourceStream << "			if (dRetVal.second) { " <<endl;
+	locSourceStream << "				dThisEventNumberOfNeutralFS ++; " <<endl;
+	locSourceStream << "			} " <<endl;
+	locSourceStream << "			dRetVal = dEventFS_Charged.insert(locComboFS_Charged);" <<endl;
+	locSourceStream << "			if (dRetVal.second) { " <<endl;
+	locSourceStream << "				dThisEventNumberOfChargedFS ++; " <<endl;
+	locSourceStream << "			} " <<endl;
+
 	locSourceStream << "		} else { " <<endl;
 	locSourceStream << "			locAllCutsOK = false; // this combo is NOT unique" <<endl;
 	locSourceStream << "		}" <<endl;
-	locSourceStream << "		dRetVal = dEventFS_All.insert(locComboFS_All);" <<endl;
-	locSourceStream << "		if (dRetVal.second) { " <<endl;
-	locSourceStream << "			dThisEventNumberOfFS++; " <<endl;
-	locSourceStream << "			if (!locRelBeamBucket)" <<endl;
-	locSourceStream << "				dThisEventNumberOfFSAndInTime++; " <<endl;
-	locSourceStream << "		} " <<endl;
-	locSourceStream << "		dRetVal = dEventFS_Positive.insert(locComboFS_Positive);" <<endl;
-	locSourceStream << "		if (dRetVal.second) { " <<endl;
-	locSourceStream << "			dThisEventNumberOfPositiveFS ++; " <<endl;
-	locSourceStream << "		} " <<endl;
-	locSourceStream << "		dRetVal = dEventFS_Negative.insert(locComboFS_Negative);" <<endl;
-	locSourceStream << "		if (dRetVal.second) { " <<endl;
-	locSourceStream << "			dThisEventNumberOfNegativeFS ++; " <<endl;
-	locSourceStream << "		} " <<endl;
-	locSourceStream << "		dRetVal = dEventFS_Neutral.insert(locComboFS_Neutral);" <<endl;
-	locSourceStream << "		if (dRetVal.second) { " <<endl;
-	locSourceStream << "			dThisEventNumberOfNeutralFS ++; " <<endl;
-	locSourceStream << "		} " <<endl;
-	locSourceStream << "		dRetVal = dEventFS_Charged.insert(locComboFS_Charged);" <<endl;
-	locSourceStream << "		if (dRetVal.second) { " <<endl;
-	locSourceStream << "			dThisEventNumberOfChargedFS ++; " <<endl;
-	locSourceStream << "		} " <<endl;
+
 	locSourceStream << "	} " << endl;
 	locSourceStream << endl;
 	locSourceStream << "	if ((!LoopID) && (locAllCutsOK) )" << endl;
