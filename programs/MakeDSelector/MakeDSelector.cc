@@ -125,7 +125,8 @@ void Print_HeaderFile(string locSelectorBaseName, DTreeInterface* locTreeInterfa
 	locHeaderStream << "		set<map<Particle_t, set<Int_t> > > dUsedSoFar_MissingMass;" << endl;
 	locHeaderStream << endl;
 	locHeaderStream << "		set<map<Particle_t, set<Int_t> > > dEventFS_All_MassConstraints;  // BEAM with beam photon" << endl;
-	locHeaderStream << "		set<map<Particle_t, set<Int_t> > > dEventFS_All_MassConstraints_NoB;  // NO BEAM with beam photon" << endl;
+	locHeaderStream << "		set<map<Particle_t, set<Int_t> > > dEventFS_All_MassConstraints_NoBprompt;  // NO BEAM with beam photon" << endl;
+	locHeaderStream << "		set<map<Particle_t, set<Int_t> > > dEventFS_All_MassConstraints_NoBaccident;  // NO BEAM with beam photon" << endl;
 	locHeaderStream << "		std::pair<std::set<map<Particle_t, set<Int_t> > >::iterator,bool> dRetValPart; " <<endl;
 	locHeaderStream << endl;
 	locHeaderStream << "		set<map<Int_t, set<Int_t> > > dEventFS_All_withBEAM;  // BEAM is 0" << endl;
@@ -455,7 +456,8 @@ void Print_SourceFile(string locSelectorBaseName, DTreeInterface* locTreeInterfa
 	locSourceStream << endl;
 	locSourceStream << "	// Initilaize event topology counters " << endl;
 	locSourceStream << "	dEventFS_All_MassConstraints.clear();  // Unique Combo BEAM is 0" << endl;
-	locSourceStream << "	dEventFS_All_MassConstraints_NoB.clear();  // Unique Combo only FS no Beam" << endl;
+	locSourceStream << "	dEventFS_All_MassConstraints_NoBprompt.clear();  // Unique Combo only FS no Beam" << endl;
+	locSourceStream << "	dEventFS_All_MassConstraints_NoBaccident.clear();  // Unique Combo only FS no Beam" << endl;
 	locSourceStream << "	dEventFS_All_withBEAM.clear();  // Unique Combo BEAM is 0" << endl;
 	locSourceStream << "	dEventFS_All.clear();           // Unique FS but with prompt beamp photon " << endl;
 	locSourceStream << "	dEvent_BEAM.clear();            // Unique Beam photon" << endl;
@@ -974,13 +976,13 @@ void Print_SourceFile(string locSelectorBaseName, DTreeInterface* locTreeInterfa
 	locSourceStream << "			std::map<Particle_t, std::set<int>>::iterator it;" <<endl;
 	locSourceStream << "			it = locComboAllFS_NoB.find(Unknown);" <<endl;
 	locSourceStream << "			locComboAllFS_NoB.erase(it);" <<endl;
-	locSourceStream << "			dRetValPart = dEventFS_All_MassConstraints_NoB.insert(locComboAllFS_NoB);"<<endl;
-	locSourceStream << "			if (dRetValPart.second) { // Unique FS" <<endl <<endl;
-	locSourceStream << "				if (!locRelBeamBucket) {  // Prompt beam photon" <<endl <<endl;
+	locSourceStream << "			if ( (dEventFS_All_MassConstraints_NoBprompt.find(locComboAllFS_NoB) == dEventFS_All_MassConstraints_NoBprompt.end()) && (!locRelBeamBucket)) {"<<endl;
+	locSourceStream << "   					dEventFS_All_MassConstraints_NoBprompt.insert(locComboAllFS_NoB); " <<endl;
 	locSourceStream << "   					dThisEventAllFS_WpromptB++; " <<endl;
-	locSourceStream << "   				} else { " <<endl;
+	locSourceStream << "			} " <<endl;
+	locSourceStream << "			if ( (dEventFS_All_MassConstraints_NoBaccident.find(locComboAllFS_NoB) == dEventFS_All_MassConstraints_NoBaccident.end()) && (locRelBeamBucket)) {"<<endl;
+	locSourceStream << "   					dEventFS_All_MassConstraints_NoBaccident.insert(locComboAllFS_NoB); " <<endl;
 	locSourceStream << "   					dThisEventAllFS_WoutoftimeB++; " <<endl;
-	locSourceStream << "				} " <<endl;
 	locSourceStream << "			}" <<endl <<endl;
 	locSourceStream << "			dRetVal = dEventFS_All_withBEAM.insert(locComboFS_All_withBEAM);" <<endl;
 	locSourceStream << "			if (dRetVal.second) { // This is a unique Combo: because of FS or because of Beam photon or both" <<endl <<endl;
