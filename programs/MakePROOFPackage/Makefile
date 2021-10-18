@@ -22,8 +22,8 @@ all: install
 #HEADERS
 .headers_copied: .directories_made
 	cp -r ../../${BMS_OSNAME}/include/DSelector ${DIRNAME}/
-	cp ${HALLD_RECON_HOME}/${BMS_OSNAME}/include/particleType.h ${DIRNAME}/
-	cp ${HALLD_RECON_HOME}/${BMS_OSNAME}/include/GlueX.h ${DIRNAME}/
+	cp ${HDDM_HOME}/include/particleType.h ${DIRNAME}/
+	cp ${LIBHDDM_HOME}/include/GlueX.h ${DIRNAME}/
 	date > $@
 
 # build archive

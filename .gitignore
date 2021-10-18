@@ -5,3 +5,4 @@ libraries/DSelector/Linux_*
 programs/MakeDSelector/Linux_*
 programs/tree_to_amptools/Linux_*
 Linux_*
+.make_done
